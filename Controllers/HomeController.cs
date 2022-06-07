@@ -49,6 +49,14 @@ public class HomeController : Controller
         return View();
     }
 
+    // public Add(int number, T item) //passing in any data Type
+    // {
+    //     List<string> test = new List<string>();
+
+    //     test.Add("test 2");
+        
+    // } 
+
     public IActionResult Privacy()
     {
         return View();
