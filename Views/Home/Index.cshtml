@@ -4,12 +4,17 @@
 @model IList<Hero>
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Overwatch Hero list</h1>
 </div>
 
-@foreach (var item in Model)
+@foreach (Hero hero in Model)
 {
-    <label>@item.Name</label>
+    //<label>@hero.ToString()</label> <label> Tier: @hero.Tier()</label>
+    //<img src=@hero.Portrait></img>
+    //@Url.Action("Index", "HeroDetail", new {id = hero.Key});
+
+    <a href="@Url.Action("Index", "HeroDetail", new {key = @hero.Key})">
+        <span>@hero.Name</span>
+    </a>
     <br>
 }

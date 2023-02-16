@@ -1,15 +1,12 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using OverwatchAPI.Models;
-using System.Text.Json;
 
 namespace OverwatchAPI.Controllers;
 
-//[ApiController]  //is this needed?
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
-
     public HomeController(ILogger<HomeController> logger)
     {
         _logger = logger;
@@ -17,39 +14,36 @@ public class HomeController : Controller
 
     public async Task <IActionResult> Index()
     {
-        IList<Hero> heroList = await GetHeroesAsync();   
-        return View(heroList);
-    }
+        try 
+        {
+            _logger.LogDebug("starting async call");
+            var timer = System.Diagnostics.Stopwatch.StartNew();
 
-    //[HttpGet]
-    public async Task<IList<Hero>> GetHeroesAsync()
-    {
-        //try
-        //{
-            HttpClient client = new HttpClient();
-            HttpResponseMessage response = await client.GetAsync("https://overwatch-hero-api.herokuapp.com/api/v1/heroes");
-    
-            if (response.IsSuccessStatusCode)
-            {
-               
-                var heroList = response.Content.ReadFromJsonAsync<IList<Hero>>();
-                return heroList.Result;  
-                //TODO: return right return type to fix warning
-                // read up on extension methods
-              
-            }
-            else
-            {
-                return null;
-            }
-        //}
-        //catch(HttpRequestException e)
-        //{
-        //    return null;
-        //    Console.WriteLine("Exception: " + e.Message);
-        //}
-    }
+            _logger.LogDebug("about to call Async");
+            IList<Hero>? heroList = await Hero.GetHeroesAsync(); 
+            _logger.LogDebug("async started - testing async, should run before ending async logger");
+            //TODO: get logs to output
+            
+            timer.Stop();
+            _logger.LogDebug("ending async call - Elapsed time from start: " + timer.ElapsedMilliseconds);
+            
+            //How to test if function is ASYNC and NOT
+            //write scipts that send log to 
 
+            if (heroList == null )
+            {
+                _logger.LogError("herolist is null");
+                return Error(); 
+            }
+
+            return View(heroList);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "error listing heroes");
+            return Error(); 
+        }
+    }
 
     public IActionResult Privacy()
     {
