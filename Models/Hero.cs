@@ -5,32 +5,42 @@ public class Hero
     public string? Portrait { get; set; }
     public string? Role { get; set; }  
 
-    public static async Task<IList<Hero>?> GetHeroesAsync()  //Should this be in the hero model or a service?
+    public static async Task<IList<Hero>?> GetHeroesAsync(ILogger _logger) 
     {
+        throw new Exception("Received bad status code from Overwatch API: 500");
+        
+        HttpResponseMessage? response = null; 
         try
         {
+            _logger.LogDebug("log before GetHeroes");
             HttpClient client = new HttpClient();
-            HttpResponseMessage response = await client.GetAsync("https://overfast-api.tekrop.fr/heroes"); //("https://overwatch-hero-api.herokuapp.com/api/v1/heroes");
-            //TODO: google herokuapp service, is there an azure heroku or gov equivalent
-            //cloud service, similar to Azure
+            response = await client.GetAsync("https://overfast-api.tekrop.fr/heroes"); 
 
-            if (response.IsSuccessStatusCode)
+
+            _logger.LogDebug("log after GetHeroes");
+            if (!response.IsSuccessStatusCode)
             {
-                //TODO: catch exceptions coming from ReadFromJsonAsync
-                var heroList = response.Content.ReadFromJsonAsync<IList<Hero>>();  
-                return heroList.Result;  
-            }
-            else
-            {
-                Exception ex = new Exception("received error from Overwatch API");
+                //TODO: display error page, handle different status codes
+                Exception ex = new Exception("Received bad status code from Overwatch API: " + response.StatusCode);
                 throw ex;
             }
         }
-        catch(HttpRequestException e) //TODO: display error page, handle different error codes
+        //TODO: handle client async exceptions
+        catch(Exception ex) 
         {
-            throw e;              
+            ex = new Exception("Error communicating with Overwatch API");
+            throw ex;              
         }
-        //finally{} runs regardless, might use this method do cleanup, close db, etc
+
+        try
+        {
+            var heroList = response.Content.ReadFromJsonAsync<IList<Hero>>(); 
+            return heroList.Result;   
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
     }
 
 

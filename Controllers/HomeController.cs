@@ -16,20 +16,16 @@ public class HomeController : Controller
     {
         try 
         {
-            _logger.LogDebug("starting async call");
+            //_logger.LogDebug("starting async call");
             var timer = System.Diagnostics.Stopwatch.StartNew();
 
             _logger.LogDebug("about to call Async");
-            IList<Hero>? heroList = await Hero.GetHeroesAsync(); 
-            _logger.LogDebug("async started - testing async, should run before ending async logger");
-            //TODO: get logs to output
+            IList<Hero>? heroList = await Hero.GetHeroesAsync(_logger); 
+            _logger.LogDebug("log after async call");
             
             timer.Stop();
-            _logger.LogDebug("ending async call - Elapsed time from start: " + timer.ElapsedMilliseconds);
+           // _logger.LogDebug("ending async call - Elapsed time from start: " + timer.ElapsedMilliseconds);
             
-            //How to test if function is ASYNC and NOT
-            //write scipts that send log to 
-
             if (heroList == null )
             {
                 _logger.LogError("herolist is null");
@@ -40,19 +36,25 @@ public class HomeController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "error listing heroes");
-            return Error(); 
+            string errorMesage = "error listing heroes";
+            _logger.LogError(ex, errorMesage);
+            return Error(errorMesage); 
         }
     }
 
     public IActionResult Privacy()
-    {
+    {   //https://learn.microsoft.com/en-us/aspnet/core/mvc/views/overview?view=aspnetcore-7.0
         return View();
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    public IActionResult Error(string errorMessage = "")
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+
+        //return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        
+        //why is supplying the ViewName bypassing app.Environment.IsDevelopment? 
+        ErrorViewModel err = new ErrorViewModel { RequestId = Activity.Current?.Id, ErrorMessage = errorMessage ?? HttpContext.TraceIdentifier };
+        return View("Error", err);
     }
 }
